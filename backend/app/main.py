@@ -1,9 +1,13 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import get_settings
 from app.core.database import engine, Base
+from app.core.rate_limit import limiter
+from app.core.error_handlers import rate_limit_handler, general_exception_handler
 from app.api.routes import campaign, image, seasonal
 
 
@@ -31,6 +35,10 @@ app = FastAPI(
     description="API for generating UK-focused social media marketing content using AI",
     lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,

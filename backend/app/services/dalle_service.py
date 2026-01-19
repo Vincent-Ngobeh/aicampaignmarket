@@ -2,24 +2,18 @@ from openai import OpenAI
 from openai import APIError, APIConnectionError, RateLimitError
 
 from app.core.config import get_settings
+from app.core.exceptions import AIServiceException, BadRequestException
 
 
 settings = get_settings()
 
 
 async def generate_image(prompt: str, size: str = "1024x1024") -> dict:
-    """
-    Generate an image using DALL-E API.
-
-    Args:
-        prompt: Image generation prompt
-        size: Image size (1024x1024, 1024x1792, 1792x1024)
-
-    Returns:
-        Dict with image URL and revised prompt
-    """
     if not settings.openai_api_key:
-        raise ValueError("OpenAI API key is not configured")
+        raise BadRequestException(
+            error="Configuration error",
+            detail="OpenAI API key is not configured",
+        )
 
     client = OpenAI(api_key=settings.openai_api_key)
 
@@ -40,9 +34,18 @@ async def generate_image(prompt: str, size: str = "1024x1024") -> dict:
             "revised_prompt": response.data[0].revised_prompt,
         }
 
-    except RateLimitError as e:
-        raise ValueError(f"Rate limit exceeded. Please try again later. {str(e)}")
-    except APIConnectionError as e:
-        raise ValueError(f"Could not connect to OpenAI API. {str(e)}")
+    except RateLimitError:
+        raise AIServiceException(
+            service="DALL-E",
+            detail="Rate limit exceeded. Please try again in a few moments.",
+        )
+    except APIConnectionError:
+        raise AIServiceException(
+            service="DALL-E",
+            detail="Could not connect to OpenAI API. Please try again.",
+        )
     except APIError as e:
-        raise ValueError(f"OpenAI API error: {str(e)}")
+        raise AIServiceException(
+            service="DALL-E",
+            detail=str(e),
+        )

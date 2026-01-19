@@ -1,18 +1,13 @@
-"""
-Claude API service for generating social media marketing copy.
-Uses Anthropic's Claude API to create British English content.
-"""
-
 import anthropic
 from anthropic import APIError, APIConnectionError, RateLimitError
 
 from app.core.config import get_settings
+from app.core.exceptions import AIServiceException, BadRequestException
 from app.schemas.campaign import CampaignBrief, PlatformCopy, CopyGenerationResponse
 
 
 settings = get_settings()
 
-# Platform character limits (approximate guidelines)
 PLATFORM_LIMITS = {
     "Instagram": 2200,
     "Facebook": 500,
@@ -23,15 +18,10 @@ PLATFORM_LIMITS = {
 
 
 def get_platform_limit(platform: str) -> int:
-    """Get character limit for a platform."""
     return PLATFORM_LIMITS.get(platform, 500)
 
 
 def build_copy_prompt(brief: CampaignBrief) -> str:
-    """
-    Build the prompt for Claude to generate social media copy.
-    Emphasises British English and UK-specific content.
-    """
     platforms_info = "\n".join(
         f"- {p}: Maximum {get_platform_limit(p)} characters"
         for p in brief.platforms
@@ -95,20 +85,15 @@ Your DALL-E prompt here...
 
 
 def parse_claude_response(response_text: str, platforms: list[str]) -> tuple[list[PlatformCopy], str]:
-    """
-    Parse Claude's response into structured platform copies and image prompt.
-    """
     copies = []
     image_prompt = ""
 
-    # Extract image prompt
     if "[IMAGE_PROMPT]" in response_text:
         start = response_text.find("[IMAGE_PROMPT]") + len("[IMAGE_PROMPT]")
         end = response_text.find("[/IMAGE_PROMPT]")
         if end > start:
             image_prompt = response_text[start:end].strip()
 
-    # Extract copy for each platform
     for platform in platforms:
         marker = f"[PLATFORM: {platform}]"
         if marker in response_text:
@@ -130,24 +115,13 @@ def parse_claude_response(response_text: str, platforms: list[str]) -> tuple[lis
 
 
 async def generate_copy(brief: CampaignBrief) -> CopyGenerationResponse:
-    """
-    Generate social media copy using Claude API.
-
-    Args:
-        brief: Campaign brief with business and campaign details
-
-    Returns:
-        CopyGenerationResponse with generated copy for each platform
-
-    Raises:
-        ValueError: If API key is not configured
-        anthropic.APIError: If API call fails
-    """
     if not settings.anthropic_api_key:
-        raise ValueError("Anthropic API key is not configured")
+        raise BadRequestException(
+            error="Configuration error",
+            detail="Anthropic API key is not configured",
+        )
 
     client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-
     prompt = build_copy_prompt(brief)
 
     try:
@@ -165,9 +139,7 @@ async def generate_copy(brief: CampaignBrief) -> CopyGenerationResponse:
         response_text = message.content[0].text
         copies, image_prompt = parse_claude_response(response_text, brief.platforms)
 
-        # Fallback if parsing failed
         if not copies:
-            # Create a simple copy from the response
             copies = [
                 PlatformCopy(
                     platform=brief.platforms[0] if brief.platforms else "General",
@@ -187,9 +159,18 @@ async def generate_copy(brief: CampaignBrief) -> CopyGenerationResponse:
             message="Copy generated successfully using British English",
         )
 
-    except RateLimitError as e:
-        raise ValueError(f"Rate limit exceeded. Please try again later. {str(e)}")
-    except APIConnectionError as e:
-        raise ValueError(f"Could not connect to Claude API. {str(e)}")
+    except RateLimitError:
+        raise AIServiceException(
+            service="Claude",
+            detail="Rate limit exceeded. Please try again in a few moments.",
+        )
+    except APIConnectionError:
+        raise AIServiceException(
+            service="Claude",
+            detail="Could not connect to Claude API. Please try again.",
+        )
     except APIError as e:
-        raise ValueError(f"Claude API error: {str(e)}")
+        raise AIServiceException(
+            service="Claude",
+            detail=str(e),
+        )
