@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.database import engine, Base
-from app.api.routes import campaign, image
+from app.api.routes import campaign, image, seasonal
 
 
 settings = get_settings()
@@ -61,3 +61,4 @@ async def health_check():
 
 app.include_router(campaign.router, prefix="/api/v1")
 app.include_router(image.router, prefix="/api/v1")
+app.include_router(seasonal.router, prefix="/api/v1")
