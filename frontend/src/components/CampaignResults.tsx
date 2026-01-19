@@ -7,7 +7,7 @@ interface CampaignResultsProps {
 
 function CopyCard({ platformCopy }: { platformCopy: PlatformCopy }) {
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(platformCopy.copy);
+    await navigator.clipboard.writeText(platformCopy.content);
   };
 
   return (
@@ -17,7 +17,7 @@ function CopyCard({ platformCopy }: { platformCopy: PlatformCopy }) {
         <span className="char-count">{platformCopy.character_count} characters</span>
       </div>
       <div className="copy-content">
-        <p>{platformCopy.copy}</p>
+        <p>{platformCopy.content}</p>
       </div>
       <button className="btn btn-secondary btn-small" onClick={handleCopy}>
         Copy to Clipboard

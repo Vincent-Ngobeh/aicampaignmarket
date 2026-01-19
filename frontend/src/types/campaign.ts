@@ -13,7 +13,7 @@ export interface CampaignBrief {
 
 export interface PlatformCopy {
   platform: string;
-  copy: string;
+  content: string;
   character_count: number;
 }
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import CampaignForm from "./components/CampaignForm";
 import CampaignResults from "./components/CampaignResults";
 import type { CampaignBrief, CampaignResponse } from "./types/campaign";
-import { generateFullCampaign } from "./services/api";
+import { generateFullCampaign, generateCopyOnly } from "./services/api";
 import "./App.css";
 
 function App() {
@@ -10,12 +10,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (brief: CampaignBrief) => {
+  const handleSubmit = async (brief: CampaignBrief, generateImage: boolean) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await generateFullCampaign(brief);
+      const response = generateImage
+        ? await generateFullCampaign(brief)
+        : await generateCopyOnly(brief);
       setResult(response);
     } catch (err) {
       if (err instanceof Error) {

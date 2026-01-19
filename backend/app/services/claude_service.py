@@ -106,7 +106,7 @@ def parse_claude_response(response_text: str, platforms: list[str]) -> tuple[lis
                 copies.append(
                     PlatformCopy(
                         platform=platform,
-                        copy=copy_text,
+                        content=copy_text,
                         character_count=len(copy_text),
                     )
                 )
@@ -143,7 +143,7 @@ async def generate_copy(brief: CampaignBrief) -> CopyGenerationResponse:
             copies = [
                 PlatformCopy(
                     platform=brief.platforms[0] if brief.platforms else "General",
-                    copy=response_text[:500],
+                    content=response_text[:500],
                     character_count=min(len(response_text), 500),
                 )
             ]

@@ -7,7 +7,7 @@ import {
 } from "../types/campaign";
 
 interface CampaignFormProps {
-  onSubmit: (brief: CampaignBrief) => void;
+  onSubmit: (brief: CampaignBrief, generateImage: boolean) => void;
   isLoading: boolean;
 }
 
@@ -27,6 +27,7 @@ const initialFormState: CampaignBrief = {
 export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps) {
   const [formData, setFormData] = useState<CampaignBrief>(initialFormState);
   const [step, setStep] = useState(1);
+  const [generateImage, setGenerateImage] = useState(true);
   const totalSteps = 3;
 
   const handleInputChange = (
@@ -59,9 +60,27 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
     }));
   };
 
+  const handleNext = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (step < totalSteps) {
+      setStep(step + 1);
+    }
+  };
+
+  const handleBack = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (step === totalSteps && canProceed()) {
+      onSubmit(formData, generateImage);
+    }
   };
 
   const canProceed = () => {
@@ -242,6 +261,17 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
               Include emojis
             </label>
           </div>
+
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={generateImage}
+                onChange={(e) => setGenerateImage(e.target.checked)}
+              />
+              Generate promotional image (takes longer)
+            </label>
+          </div>
         </div>
       )}
 
@@ -250,7 +280,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={() => setStep(step - 1)}
+            onClick={handleBack}
             disabled={isLoading}
           >
             Back
@@ -261,7 +291,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => setStep(step + 1)}
+            onClick={handleNext}
             disabled={!canProceed()}
           >
             Continue

@@ -42,7 +42,7 @@ class CampaignBrief(BaseModel):
 
 class PlatformCopy(BaseModel):
     platform: str
-    copy: str
+    content: str
     character_count: int
 
 
