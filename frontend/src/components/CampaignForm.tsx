@@ -91,7 +91,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
 
       {step === 1 && (
         <div className="form-step">
-          <h2>Business Details</h2>
+          <h2>Tell us about your business</h2>
 
           <div className="form-group">
             <label htmlFor="business_name">Business Name</label>
@@ -107,7 +107,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
           </div>
 
           <div className="form-group">
-            <label htmlFor="business_type">Business Type</label>
+            <label htmlFor="business_type">What type of business is it?</label>
             <input
               type="text"
               id="business_type"
@@ -120,7 +120,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
           </div>
 
           <div className="form-group">
-            <label htmlFor="target_audience">Target Audience</label>
+            <label htmlFor="target_audience">Who are your customers?</label>
             <textarea
               id="target_audience"
               name="target_audience"
@@ -136,7 +136,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
 
       {step === 2 && (
         <div className="form-step">
-          <h2>Campaign Information</h2>
+          <h2>What would you like to promote?</h2>
 
           <div className="form-group">
             <label htmlFor="campaign_goal">Campaign Goal</label>
@@ -185,7 +185,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
 
       {step === 3 && (
         <div className="form-step">
-          <h2>Content Preferences</h2>
+          <h2>Customise your content</h2>
 
           <div className="form-group">
             <label htmlFor="tone">Tone of Voice</label>
@@ -204,7 +204,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
           </div>
 
           <div className="form-group">
-            <label>Platforms</label>
+            <label>Which platforms do you need?</label>
             <div className="platform-grid">
               {AVAILABLE_PLATFORMS.map((platform) => (
                 <button
@@ -264,7 +264,7 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
             onClick={() => setStep(step + 1)}
             disabled={!canProceed()}
           >
-            Next
+            Continue
           </button>
         ) : (
           <button
@@ -272,7 +272,14 @@ export default function CampaignForm({ onSubmit, isLoading }: CampaignFormProps)
             className="btn btn-primary"
             disabled={isLoading || !canProceed()}
           >
-            {isLoading ? "Generating..." : "Generate Campaign"}
+            {isLoading ? (
+              <>
+                <span className="loading-spinner"></span>
+                Generating...
+              </>
+            ) : (
+              "Generate Campaign"
+            )}
           </button>
         )}
       </div>

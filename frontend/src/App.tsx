@@ -21,7 +21,7 @@ function App() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setError("Something went wrong. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -37,7 +37,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>AI Social Market</h1>
-        <p>Generate British English social media content for your business</p>
+        <p>Create engaging social media content for your UK business in seconds</p>
       </header>
 
       <main className="app-main">
@@ -56,7 +56,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>AI Social Market - UK Marketing Assistant</p>
+        <p>Made for UK small businesses</p>
       </footer>
     </div>
   );
